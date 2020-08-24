@@ -12,13 +12,13 @@ flag_update_adsr=true
 function init()
   params:add_separator("aaa params")
   params:add_group("adsr",4)
-  params:add_control("attackTime","attackTime",controlspec.new(0,10,"lin",0.1,0.1,"s"))
+  params:add_control("attackTime","attackTime",controlspec.new(0,10,"lin",0.1,1.3,"s"))
   params:set_action("attackTime",update_adsr)
-  params:add_control("decayTime","decayTime",controlspec.new(0,10,"lin",0.1,0.3,"s"))
+  params:add_control("decayTime","decayTime",controlspec.new(0,10,"lin",0.1,2.0,"s"))
   params:set_action("decayTime",update_adsr)
-  params:add_control("sustainLevel","sustainLevel",controlspec.new(0,1,"lin",0.1,0.5))
+  params:add_control("sustainLevel","sustainLevel",controlspec.new(0,1,"lin",0.1,0.7))
   params:set_action("sustainLevel",update_adsr)
-  params:add_control("releaseTime","releaseTime",controlspec.new(0,10,"lin",0.1,0.3,"s"))
+  params:add_control("releaseTime","releaseTime",controlspec.new(0,10,"lin",0.1,1.6,"s"))
   params:set_action("releaseTime",update_adsr)
   
   midi_signal_in=midi.connect(1)
@@ -36,7 +36,7 @@ function on_midi_event(data)
   if msg.type=='note_on' then
     hz=(440/32)*(2^((msg.note-9)/12))
     print(msg.note,msg.vel/127.0)
-    engine.start(msg.note,1.0)
+    engine.start(msg.note,msg.vel/127.0)
   elseif msg.type=='note_off' then
     engine.stop(msg.note)
   end

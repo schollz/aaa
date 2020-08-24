@@ -17,7 +17,7 @@ Engine_PolySub4 : CroneEngine {
     StartUp.add {
       // a decently versatile subtractive synth voice
       polyDef = SynthDef.new(\polySub4, {
-       arg out, gate=1, hz, level=0.2, // the basics
+       arg out, gate=1, hz, velocity=1, level=0.2, // the basics
         // amplitude envelope params
         ampAtk=0.05, ampDec=0.1, ampSus=1.0, ampRel=1.0, ampCurve= -1.0,
         // filter envelope params
@@ -27,10 +27,10 @@ Engine_PolySub4 : CroneEngine {
         var freq = Lag.kr(hz, hzLag);
         var adsr = EnvGen.ar(Env.adsr(cutAtk,cutDec,cutSus,cutRel), gate, doneAction:2);
 
-        var nvoices1 = 8, nvoices2 = 6;
-        var detune1 = 10, detune2 = 5;
-        var rr1 = Array.rand2(nvoices1,0.1);
-        var rr2 = Array.rand2(nvoices2,0.1);
+        var nvoices1 = 5, nvoices2 = 4;
+        var detune1 = 10, detune2 = 4;
+        var rr1 = Array.rand2(nvoices1,0.5);
+        var rr2 = Array.rand2(nvoices2,0.5);
 
         var osc1 = (1..nvoices1-1).collect({|numOsc|
           var m = 2**(detune1/1200).rand2;
@@ -44,8 +44,8 @@ Engine_PolySub4 : CroneEngine {
           Pan2.ar(DelayC.ar(LFSaw.ar(m * freq), 0.02, freq.reciprocal * lfo),rr2[numOsc]);
         });
 
-        var snd = BLowPass4.ar(osc1, 800, 0.5)/1 + BHiPass4.ar(osc2,2000,0.5) / 4;
-        Out.ar(out, level*Limiter.ar(snd*adsr));
+        var snd = BLowPass4.ar(osc1, 800, 0.5)/1 + BHiPass4.ar(osc2,200,0.5) / 4;
+        Out.ar(out, LeakDC.ar(Limiter.ar(level*velocity*snd*adsr)));
       });
 
       CroneDefs.add(polyDef);
@@ -53,6 +53,7 @@ Engine_PolySub4 : CroneEngine {
       //// FIXME: probably a better way... ehh.
       paramDefaults = Dictionary.with(
         \level -> -12.dbamp,
+        \velocity -> 1,
         \ampAtk -> 0.05, \ampDec -> 0.1, \ampSus -> 1.0, \ampRel -> 1.0, \ampCurve ->  -1.0,
         \cutAtk -> 0.0, \cutDec -> 0.0, \cutSus -> 1.0, \cutRel -> 1.0,
         \hzLag -> 0.1
@@ -120,7 +121,7 @@ Engine_PolySub4 : CroneEngine {
     postln("polysub: performing init callback");
   }
 
-  addVoice { arg id, hz,level,map=true;
+  addVoice { arg id, hz,velocity,map=true;
     var params = List.with(\out, context.out_b.index, \hz, hz);
     var numVoices = voices.size;
     //postln("num voices: " ++ numVoices);
@@ -128,7 +129,7 @@ Engine_PolySub4 : CroneEngine {
     if(voices[id].notNil, {
       voices[id].set(\gate, 1);
       voices[id].set(\hz, hz);
-      voices[id].set(\level,level);
+      voices[id].set(\velocity,velocity);
     }, {
       if(numVoices < maxNumVoices, {
         // shouldn't need this
