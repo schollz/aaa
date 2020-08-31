@@ -28,7 +28,7 @@ Engine_PolySub4 : CroneEngine {
         var adsr = EnvGen.ar(Env.adsr(cutAtk,cutDec,cutSus,cutRel), gate, doneAction:2);
 
         var nvoices1 = 5, nvoices2 = 4;
-        var detune1 = 10, detune2 = 4;
+        var detune1 = 8, detune2 = 4;
         var rr1 = Array.rand2(nvoices1,0.5);
         var rr2 = Array.rand2(nvoices2,0.5);
 
